@@ -17,11 +17,12 @@ public class LevelButtonManager : MonoBehaviour
     public GameObject[] normalStars; // Empty stars
     public GameObject[] glowStars;   // Filled stars
 
+    // ===== CHANGED: replaced sprite-swap fields with the two CircleColor state objects =====
     [Header("Button States")]
-    public Sprite lockedSprite;
-    public Sprite unlockedSprite;
-    private Image buttonImage;
+    public GameObject notCompleteObject; // drag "CircleColor/NotComplete" here
+    public GameObject completedObject;   // drag "CircleColor/Completed" here
     public GameObject lockIcon; // Optional lock icon
+    // ===== END CHANGED =====
 
     [Header("Current Level Effect")]
     public GameObject currentLevelGlow; // Optional effect for current level
@@ -33,7 +34,7 @@ public class LevelButtonManager : MonoBehaviour
         /*if (button != null)
             button.interactable = value;*/
         this.GetComponent<Button>().interactable = value;
-        buttonImage.color = value ? Color.white : Color.gray; // Change color based on interactability
+        // ===== CHANGED: removed buttonImage.color reference since buttonImage no longer exists =====
         /*if (currentLevelGlow != null)
         {
             currentLevelGlow.SetActive(value && isCurrentLevel);
@@ -47,7 +48,7 @@ public class LevelButtonManager : MonoBehaviour
 
     private void Awake()
     {
-        buttonImage = GetComponent<Image>();
+        // ===== CHANGED: buttonImage no longer fetched here, CircleColor children are assigned via Inspector =====
     }
 
     private void Update()
@@ -57,17 +58,23 @@ public class LevelButtonManager : MonoBehaviour
         UpdateLevelIdText();
     }
 
-    
 
+
+    // ===== CHANGED: now toggles NotComplete/Completed objects instead of swapping a sprite =====
     public void UpdateButtonState()
     {
-        buttonImage.sprite = isLocked ? lockedSprite : unlockedSprite;
+        if (notCompleteObject != null)
+            notCompleteObject.SetActive(isLocked);
+
+        if (completedObject != null)
+            completedObject.SetActive(!isLocked);
 
         if (currentLevelGlow != null)
         {
             currentLevelGlow.SetActive(isCurrentLevel);
         }
     }
+    // ===== END CHANGED =====
 
     public void UpdateStarDisplay()
     {
@@ -135,7 +142,7 @@ public class LevelButtonManager : MonoBehaviour
     {
         if (stageManager != null)
         {
-            
+
             stageManager.SelectLevel(this); // just pass the clicked button
         }
     }

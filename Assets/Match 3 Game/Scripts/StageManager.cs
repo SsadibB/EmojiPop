@@ -138,25 +138,40 @@ private void ApplyDataToButtons()
         }
 
         // Draw the buttons on the map
+        // Draw the buttons on the map
         for (int i = 0; i < levelButtons.Length; i++)
         {
             LevelButtonManager btn = levelButtons[i];
-            btn.SetLevelId(i + 1); 
-            btn.isCurrentLevel = (i + 1 == currentLevel); 
-            
+
+            if (btn == null)
+            {
+                Debug.LogWarning($"[StageManager] levelButtons[{i}] is not assigned in the Inspector.", this);
+                continue;
+            }
+
+            Button uiButton = btn.GetComponent<Button>();
+            if (uiButton == null)
+                uiButton = btn.GetComponentInChildren<Button>(true); // fallback if Button lives on a child
+
+            if (uiButton == null)
+                Debug.LogWarning($"[StageManager] No Button component found on '{btn.gameObject.name}' (levelButtons[{i}]).", btn.gameObject);
+
+            btn.SetLevelId(i + 1);
+            btn.isCurrentLevel = (i + 1 == currentLevel);
+
             LevelInfo levelInfo = pData.Levels.Find(l => l.LevelID == btn.levelId);
             if (levelInfo != null)
             {
                 btn.SetStar(levelInfo.Stars);
                 btn.SetLocked(levelInfo.LevelLocked == 1);
-                btn.GetComponent<Button>().interactable = (levelInfo.LevelLocked == 0);
+                if (uiButton != null) uiButton.interactable = (levelInfo.LevelLocked == 0);
             }
             else
             {
                 // Any levels not found in the save file default to locked
                 btn.SetStar(0);
                 btn.SetLocked(true);
-                btn.GetComponent<Button>().interactable = false; 
+                if (uiButton != null) uiButton.interactable = false;
             }
         }
         SendDataToLeaderBoard();
